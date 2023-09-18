@@ -181,14 +181,20 @@ def get_pkgs(requirements: str = None) -> dict:
                 pass
     return pkgs
 
-def is_current(package: str) -> bool:
+def is_current(package: str, exact: bool = True) -> bool:
     """
-    Check if the specified package is the current version.
+    Check if the specified package is the current version
+    or above.
 
     Parameters
     ----------
     package : str
         The name of the package to check.
+    exact : bool, optional
+        If False, the function checks if the package
+        is available with a version above the specified version.
+        Defaults to True.
+
 
     Returns
     -------
@@ -197,11 +203,14 @@ def is_current(package: str) -> bool:
 
     """
     pkg = get_pkgs().get(package)
-    return is_available(pkg.get('name'), pkg.get('version'))
+    return is_available(pkg.get('name'), pkg.get('version'),
+                        exact=exact)
 
-def is_available(package: str, version: str = None) -> bool:
+def is_available(package: str, version: str = None,
+                 exact=True) -> bool:
     """
-    Check if a given package is available with the specified version.
+    Check if a given package is available with the specified version
+    or above.
 
     Parameters
     ----------
@@ -209,6 +218,11 @@ def is_available(package: str, version: str = None) -> bool:
         The name of the package to check.
     version : str, optional
         The version of the package to check.
+    exact : bool, optional
+        If True, the function checks if the package
+        is available with the exact version specified. If False,
+        the function checks if the package is available with a version
+        above the specified version.
 
     Returns
     -------
@@ -223,7 +237,9 @@ def is_available(package: str, version: str = None) -> bool:
 
     try: 
         available_version = get_distribution(package).version
-        return available_version == version
+        if exact:
+            return available_version == version
+        return available_version >= version
     except DistributionNotFound:
         return False
 
